@@ -1,27 +1,26 @@
 import torch
 from pydantic import Field
+from typing import Any
 
-from proconfig.widgets.base import WIDGETS
-from proconfig.widgets.imagen_widgets.base import ImagenBaseWidget
-from proconfig.widgets.imagen_widgets.utils.custom_types import IMAGE
+from proconfig.widgets.base import WIDGETS, BaseWidget
 
 from diffusers import DiffusionPipeline, UniPCMultistepScheduler
 
 from torchvision.transforms.functional import to_tensor
 
 @WIDGETS.register_module()
-class DiffuserImagenWidget(ImagenBaseWidget):
+class DiffuserImagenWidget(BaseWidget):
     CATEGORY = "Diffusers/Image Generation"
     NAME = "Diffusers Image Generation"
     
-    class InputsSchema(ImagenBaseWidget.InputsSchema):
+    class InputsSchema(BaseWidget.InputsSchema):
         model_id: str = Field("stabilityai/stable-diffusion-xl-base-1.0", description="the huggingface model id")
         prompt: str = Field(..., description="the positive prompt")
         negative_prompt: str = Field("", description="the negative prompt")
         num_inference_steps: int = 15
     
-    class OutputsSchema(ImagenBaseWidget.OutputsSchema):
-        image: IMAGE
+    class OutputsSchema(BaseWidget.OutputsSchema):
+        image: Any
         
     def execute(self, environ, config):
         pipe = DiffusionPipeline.from_pretrained(config.model_id, torch_dtype=torch.float16, use_safetensors=True, variant="fp16")
